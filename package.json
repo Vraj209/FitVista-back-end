@@ -1,0 +1,24 @@
+{
+  "name": "fitvista-back-end",
+  "version": "1.0.0",
+  "description": "This is capstone project in conestoga college",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vraj209/FitVista-back-end.git"
+  },
+  "keywords": [
+    "fitness",
+    "capstone",
+    "project"
+  ],
+  "author": "Vraj Panchal",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Vraj209/FitVista-back-end/issues"
+  },
+  "homepage": "https://github.com/Vraj209/FitVista-back-end#readme"
+}
