@@ -1,8 +1,10 @@
+import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { app } from "./app.js";
-dotenv.config({ path: "./.env" });
+import cors from "cors";
 import connectDB from "./db/index.js";
 
+dotenv.config({ path: "./.env" });
 
 app.use(
   cors({

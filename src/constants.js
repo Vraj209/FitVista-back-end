@@ -1,1 +1,3 @@
-export const DB_NAME = "fitvista";
+const DB_NAME = "fitvista";
+ 
+export { DB_NAME}
