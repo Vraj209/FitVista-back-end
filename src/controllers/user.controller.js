@@ -65,7 +65,7 @@ const signin = asyncHandler(async (req, res) => {
           const token = await jwt.sign(
             tokenData,
             process.env.ACCESS_TOKEN_SECRET,
-            { expiresIn: process.env.ACCESS_TOKEN_EXPIRY}
+            { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
           );
 
           const response = new ApiResponse(
@@ -76,7 +76,7 @@ const signin = asyncHandler(async (req, res) => {
           );
           const options = {
             httpOnly: true,
-          }
+          };
           res.cookie("token", token, options);
           return res.json(response);
         }
@@ -89,6 +89,43 @@ const signin = asyncHandler(async (req, res) => {
     }
   } catch (error) {
     console.log("Error to fetch data from front end in signin", error);
+    res.status(500).json({ message: error, Status: 500 });
+  }
+});
+
+// change password
+const changePassword = asyncHandler(async (req, res) => {
+  try {
+    const { email, password, newPassword } = req.body;
+    try {
+      const user = await User.findOne({ email });
+      if (user) {
+        const matchPassword = await bcrypt.compare(password, user.password);
+        if (!matchPassword) {
+          console.log("Old password not match");
+          res
+            .status(400)
+            .json({ message: "Old password not match", Status: 400 });
+        } else {
+          const passowrdHashed = await bcrypt.hash(newPassword, 10);
+          user.password = passowrdHashed;
+          const updatedUser = await user.save();
+          res.status(200).json({
+            message: "Password changed successfully",
+            updatedUser,
+            status: 200,
+          });
+          console.log("Password changed successfully", updatedUser);
+        }
+      } else {
+        console.log("User not exist");
+        res.status(400).json({ message: "User not exist", Status: 400 });
+      }
+    } catch (error) {
+      console.log("Error in changing password", error);
+    }
+  } catch (error) {
+    console.log("Error to fetch data from front end in change password", error);
     res.status(500).json({ message: error, Status: 500 });
   }
 });
@@ -106,4 +143,4 @@ const logout = asyncHandler(async (req, res) => {
   }
 });
 
-export { signup, signin, logout };
+export { signup, signin, logout, changePassword};
