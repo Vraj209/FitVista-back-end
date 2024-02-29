@@ -50,24 +50,45 @@ const signup = asyncHandler(async (req, res) => {
 const signin = asyncHandler(async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    if (user) {
-      const matchPassword = await bcrypt.compare(
-        req.body.password,
-        user.password
-      );
-      if (matchPassword) {
-        req.session.userid = user._id;
-        // res.redirect("/");
-        res.status(200).json({ message: "SignIn successfully", Status: 200 });
+    try {
+      const user = await User.findOne({ email });
+      if (user) {
+        const matchPassword = await bcrypt.compare(password, user.password);
+        if (!matchPassword) {
+          console.log("Password not match");
+          res.status(400).json({ message: "Password not match", Status: 400 });
+        } else {
+          const tokenData = {
+            id: user._id,
+            email: user.email,
+          };
+          const token = await jwt.sign(
+            tokenData,
+            process.env.ACCESS_TOKEN_SECRET,
+            { expiresIn: process.env.ACCESS_TOKEN_EXPIRY}
+          );
+
+          const response = new ApiResponse(
+            200,
+            "User signin successfully",
+            user,
+            token
+          );
+          const options = {
+            httpOnly: true,
+          }
+          res.cookie("token", token, options);
+          return res.json(response);
+        }
       } else {
-        res.status(500).json({ message: "password wrong", Status: 500 });
+        console.log("User not exist");
+        res.status(400).json({ message: "User not exist", Status: 400 });
       }
-    } else {
-      res.status(500).json({ message: "User not exist", Status: 500 });
+    } catch (error) {
+      console.log("Error in signin", error);
     }
   } catch (error) {
-    console.log(error);
+    console.log("Error to fetch data from front end in signin", error);
     res.status(500).json({ message: error, Status: 500 });
   }
 });
