@@ -6,6 +6,9 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
+import { sendEmail } from "../utils/sendEmail.js";
+import { getResetPasswordToken } from "../models/user.model.js";
 
 // Register a new user
 const signup = asyncHandler(async (req, res) => {
@@ -130,6 +133,29 @@ const changePassword = asyncHandler(async (req, res) => {
   }
 });
 
+// forgot password
+const forgotPassword = asyncHandler(async (req, res) => {
+  try {
+    const { email } = req.body;
+    try {
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(400).json({ message: "User not exist", Status: 400 });
+      } else {
+        const resetToken = await User.getResetPasswordToken();
+        const url = `${process.env.FRONT_END_URL}/forgotPassword/${resetToken}`;
+        const message = `Click on the link to reset your password ${url} . If you didn't request this, please ignore this email.`;
+        await sendEmail(user.email, "Reset Password", message);
+      }
+    } catch (error) {
+      console.log("Error in forgot password", error);
+    }
+  } catch (error) {
+    console.log("Error to fetch data from front end in forgot password", error);
+    res.status(500).json({ message: error, Status: 500 });
+  }
+});
+
 // logout user
 const logout = asyncHandler(async (req, res) => {
   try {
@@ -143,4 +169,4 @@ const logout = asyncHandler(async (req, res) => {
   }
 });
 
-export { signup, signin, logout, changePassword};
+export { signup, signin, logout, changePassword, forgotPassword };
