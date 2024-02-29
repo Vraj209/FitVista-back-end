@@ -10,19 +10,38 @@ import bcrypt from "bcrypt";
 // Register a new user
 const signup = asyncHandler(async (req, res) => {
   try {
-    const { firstname, lastname, email, password, role } = req.body;
+    const { firstName, lastName, role, email, password } = req.body;
     const passowrdHashed = await bcrypt.hash(password, 10);
-    const user = new User({
-      firstname,
-      lastname,
-      email,
-      password: passowrdHashed,
-      role,
-    });
-    await user.save();
-    res.status(200).json({ message: "User Signup successfully", status: 200 });
+    try {
+      // if user already exist
+      const exitsteduser = await User.findOne({ email });
+      if (exitsteduser) {
+        console.log("User already exist");
+        return res
+          .status(400)
+          .json({ message: "User already exist", Status: 400 });
+      } else {
+        // create a new user
+        const user = new User({
+          firstName,
+          lastName,
+          role,
+          email,
+          password: passowrdHashed,
+        });
+        const savedUser = await user.save();
+        res.status(200).json({
+          message: "User Signup successfully",
+          savedUser,
+          status: 200,
+        });
+        console.log("User saved successfully", savedUser);
+      }
+    } catch (error) {
+      console.log("Error in saving user in database", error);
+    }
   } catch (error) {
-    console.log(error);
+    console.log("Error to fetch data from front end", error);
     res.status(500).json({ message: error, Status: 500 });
   }
 });
