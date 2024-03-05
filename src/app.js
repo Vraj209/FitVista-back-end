@@ -2,10 +2,13 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import userRouter from "./routes/user.routes.js";
+import productRouter from "./routes/product.routes.js";
 import paymentRouter from "./routes/payment.routes.js";
 import bodyParser from "body-parser";
 import paypal from "paypal-rest-sdk";
 import expressSession from "express-session";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
 app.use(
@@ -42,6 +45,8 @@ app.get("/", (req, res) => {
 
 // User routes
 app.use("/api/v1/users", userRouter);
+// Product routes
+app.use("/api/v1/product", productRouter);
 // Payment routes
 app.use("/api/v1/payment", paymentRouter);
 
