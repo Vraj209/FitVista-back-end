@@ -48,9 +48,9 @@ const deleteProduct = asyncHandler(async (req, res) => {
 // Get all product
 const getProducts = asyncHandler(async (req, res) => {
   try {
-      const products = await Product.find();
-      const numberOfProducts = products.length;
-    res.status(200).json({ products,numberOfProducts, status: 200 });
+    const products = await Product.find();
+    const numberOfProducts = products.length;
+    res.status(200).json({ products, numberOfProducts, status: 200 });
   } catch (error) {
     console.log("Error in getting products", error);
     res.status(500).json({ message: error, status: 500 });
@@ -87,8 +87,8 @@ const updateProduct = asyncHandler(async (req, res) => {
       product.shortDescription = shortDescription;
       product.description = description;
       product.image = image;
-        const updatedProduct = await product.save();
-        console.log("Product updated successfully", updatedProduct);
+      const updatedProduct = await product.save();
+      console.log("Product updated successfully");
       res.status(200).json({
         message: "Product updated successfully",
         updatedProduct,
