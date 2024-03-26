@@ -41,6 +41,7 @@ const userSchema = new mongoose.Schema(
     },
     trainer: {
       type: String,
+      default: "none",
       // required: true,
     },
     client: {

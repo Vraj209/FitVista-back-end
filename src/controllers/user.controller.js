@@ -65,11 +65,9 @@ const signin = asyncHandler(async (req, res) => {
             id: user._id,
             email: user.email,
           };
-          const token =  jwt.sign(
-            tokenData,
-            process.env.ACCESS_TOKEN_SECRET,
-            { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
-          );
+          const token = jwt.sign(tokenData, process.env.ACCESS_TOKEN_SECRET, {
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+          });
 
           const response = new ApiResponse(
             200,
@@ -199,6 +197,52 @@ const totalUser = asyncHandler(async (req, res) => {
     res.status(500).json({ message: error, Status: 500 });
   }
 });
+
+// get single user
+const getUser = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.params;
+    try {
+      const user = await User.findById(id);
+      if (user) {
+        res.status(200).json({ user, status: 200 });
+      } else {
+        res.status(404).json({ message: "User not found", status: 404 });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+const assignTrainer = asyncHandler(async (req, res) => {
+  try {
+    const userId = req.params.id;
+    console.log(userId);
+    const { trainer } = req.body;
+    console.log(trainer);
+    const user = await User.findById(userId);
+    if (user) {
+      
+      user.trainer = trainer;
+      const updatedTrainer = await user.save();
+      console.log("Trainer Assigned  successfully");
+      console.log(user.trainer);
+      res.status(200).json({
+        message: "Trainer Assigned  successfully",
+        updatedTrainer,
+        status: 200,
+      });
+    } else {
+      res.status(404).json({ message: "User not found", status: 404 });
+    }
+  } catch (error) {
+    console.log("Error in Assigning trainer", error);
+    res.status(500).json({ message: error, status: 500 });
+  }
+});
 export {
   signup,
   signin,
@@ -207,4 +251,6 @@ export {
   forgotPassword,
   activeUser,
   totalUser,
+  getUser,
+  assignTrainer,
 };
