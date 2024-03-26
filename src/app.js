@@ -8,6 +8,10 @@ import bodyParser from "body-parser";
 import paypal from "paypal-rest-sdk";
 import expressSession from "express-session";
 import dotenv from "dotenv";
+import blogRouter from "./routes/blog.routes.js";
+import adminRouter from "./routes/admin.routes.js";
+import cartRouter from "./routes/cart.routes.js";
+
 dotenv.config();
 
 const app = express();
@@ -49,5 +53,10 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/product", productRouter);
 // Payment routes
 app.use("/api/v1/payment", paymentRouter);
-
+// Blog routes
+app.use("/api/v1/blog", blogRouter)
+// Admin routes
+app.use("/api/v1/admin", adminRouter)
+// Cart routes
+app.use("/api/v1/cart", cartRouter);
 export { app };

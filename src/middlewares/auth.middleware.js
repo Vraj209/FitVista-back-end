@@ -1,14 +1,18 @@
 import jwt from "jsonwebtoken";
-
-const isAuthenticated = async (req, res, next) => {
-  const token = req.header("Authorization");
+import { User } from "../models/user.model.js";
+const isAuthenticated = async (req, res, next) =>
+{
+  console.log("req.headers",req.headers);
+  console.log("req.cookies",req.cookies);
+  const token = req.cookies.token;
+  console.log("token",token);
   if (!token) {
     return res.status(401).json({ message: "No token, authorization denied" });
   }
   try {
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const user = await User.findOne(decoded?._id);
+    const user = jwt.verify(token,"fitvista123");
     req.user = user;
+    console.log("user",user);
     next();
   } catch (error) {
     console.log("Error in authentication", error);

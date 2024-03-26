@@ -9,7 +9,7 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmail.js";
 import { getResetPasswordToken } from "../models/user.model.js";
-
+import dotenv from "dotenv";
 // Register a new user
 const signup = asyncHandler(async (req, res) => {
   try {
@@ -65,7 +65,7 @@ const signin = asyncHandler(async (req, res) => {
             id: user._id,
             email: user.email,
           };
-          const token = await jwt.sign(
+          const token =  jwt.sign(
             tokenData,
             process.env.ACCESS_TOKEN_SECRET,
             { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
@@ -169,4 +169,42 @@ const logout = asyncHandler(async (req, res) => {
   }
 });
 
-export { signup, signin, logout, changePassword, forgotPassword };
+// Active User
+const activeUser = asyncHandler(async (req, res) => {
+  try {
+    const users = await User.find();
+    if (users) {
+      const numberOfActiveUser = users.filter((user) => {
+        return user.status === "active";
+      }).length;
+      res.send(200).json({ numberOfActiveUser, status: 200 });
+    } else {
+      res.send(404).json({ message: "Users not found", status: 404 });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error, status: 500 });
+  }
+});
+
+// Total User
+const totalUser = asyncHandler(async (req, res) => {
+  try {
+    const users = await User.find();
+    if (users) {
+      res.status(200).json({ users, status: 200 });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error, Status: 500 });
+  }
+});
+export {
+  signup,
+  signin,
+  logout,
+  changePassword,
+  forgotPassword,
+  activeUser,
+  totalUser,
+};

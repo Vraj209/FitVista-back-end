@@ -8,5 +8,6 @@ router.route("/signin").post(signin)
 router.route("/changePassword").post(changePassword)
 router.route("/forgotPassword").post(forgotPassword)
 router.route("/logout").get(logout)
+// router.route("/getTrainers").get(getTrainers)
 
 export default router;
