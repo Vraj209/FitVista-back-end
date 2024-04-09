@@ -56,18 +56,17 @@ const signin = asyncHandler(async (req, res) => {
     try {
       const user = await User.findOne({ email });
       if (user) {
+      
         const matchPassword = await bcrypt.compare(password, user.password);
         if (!matchPassword) {
           console.log("Password not match");
           res.status(400).json({ message: "Password not match", Status: 400 });
         } else {
-          const tokenData = {
-            id: user._id,
-            email: user.email,
-          };
-          const token = jwt.sign(tokenData, process.env.ACCESS_TOKEN_SECRET, {
-            expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
-          });
+          const token = jwt.sign(
+            { userId: user._id, role: user.role, email: user.email },
+            process.env.JWT_SECRET_KEY,
+            { expiresIn: "24h" }
+          );
 
           const response = new ApiResponse(
             200,
@@ -77,6 +76,7 @@ const signin = asyncHandler(async (req, res) => {
           );
           const options = {
             httpOnly: true,
+            
           };
           res.cookie("token", token, options);
           return res.json(response);
@@ -225,7 +225,6 @@ const assignTrainer = asyncHandler(async (req, res) => {
     console.log(trainer);
     const user = await User.findById(userId);
     if (user) {
-      
       user.trainer = trainer;
       const updatedTrainer = await user.save();
       console.log("Trainer Assigned  successfully");
@@ -243,6 +242,23 @@ const assignTrainer = asyncHandler(async (req, res) => {
     res.status(500).json({ message: error, status: 500 });
   }
 });
+
+const currentUser = asyncHandler(async (req, res) =>
+{
+  try {
+    const user = await User.findById(req.user._id);
+    if (user) {
+      res.status(200).json({ user, status: 200 });
+    } else {
+      res.status(404).json({ message: "User not found", status: 404 });
+    }
+  } catch (error) {
+    console.log("Error in getting current user", error);
+    res.status(500).json({ message: error, status: 500 });
+  }
+}
+);
+
 export {
   signup,
   signin,
@@ -253,4 +269,5 @@ export {
   totalUser,
   getUser,
   assignTrainer,
+  currentUser,
 };

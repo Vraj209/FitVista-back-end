@@ -14,8 +14,11 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      requied: true,
+      required: true,
+      enum: ["trainer", "trainee", "admin"],
+      default: "trainee",
     },
+
     age: {
       type: Number,
       // required: true,
@@ -50,8 +53,8 @@ const userSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['active', 'inactive'], // Enumerate possible values
-      default: 'active', // Set default value
+      enum: ["active", "inactive"], // Enumerate possible values
+      default: "active", // Set default value
     },
     email: {
       type: String,
@@ -64,14 +67,20 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-export const getResetPasswordToken = function () {
-  const resetToken = crypto.randomBytes(20).toString("hex");
-  this.resetPasswordToken = crypto
-    .createHash("sha256")
-    .update(resetToken)
-    .digest("hex");
-  this.resetPasswordExpire = Date.now() + 10 * (60 * 1000);
-  return resetToken;
-};
+
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    next();
+  }
+
+  this.password = await bcrypt.hash(this.password, 10);
+});
+
+userSchema.methods.getJWTToken = function () {
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET_KEY, {
+      expiresIn: process.env.JWT_EXPIRE
+  });
+}
+
 
 export const User = mongoose.model("User", userSchema);
