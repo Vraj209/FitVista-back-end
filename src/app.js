@@ -11,7 +11,7 @@ import dotenv from "dotenv";
 import blogRouter from "./routes/blog.routes.js";
 import adminRouter from "./routes/admin.routes.js";
 import cartRouter from "./routes/cart.routes.js";
-
+import orderRouter from "./routes/order.routes.js";
 dotenv.config();
 const URL = process.env.CORS_ORIGIN;
 const app = express();
@@ -52,14 +52,23 @@ app.get("/", (req, res) => {
 
 // User routes
 app.use("/api/v1/users", userRouter);
+
 // Product routes
 app.use("/api/v1/product", productRouter);
+
 // Payment routes
 app.use("/api/v1/payment", paymentRouter);
+
 // Blog routes
 app.use("/api/v1/blog", blogRouter);
+
 // Admin routes
 app.use("/api/v1/admin", adminRouter);
+
 // Cart routes
 app.use("/api/v1/cart", cartRouter);
+
+// Order routes
+app.use("/api/v1/order", orderRouter);
+
 export { app };

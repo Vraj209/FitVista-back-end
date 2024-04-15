@@ -17,4 +17,5 @@ router
   .route("/removeItem/:productId")
   .delete(isAuthenticated, removeProductFromCart);
 router.route("/empty").delete(isAuthenticated, emptyCart);
+
 export default router;
