@@ -8,12 +8,13 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmail.js";
-import { getResetPasswordToken } from "../models/user.model.js";
+
 import dotenv from "dotenv";
 // Register a new user
 const signup = asyncHandler(async (req, res) => {
   try {
     const { firstName, lastName, role, email, password } = req.body;
+    console.log("Signup", password);
     const passowrdHashed = await bcrypt.hash(password, 10);
     try {
       // if user already exist
@@ -53,11 +54,13 @@ const signup = asyncHandler(async (req, res) => {
 const signin = asyncHandler(async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log(email, password);
     try {
       const user = await User.findOne({ email });
+      console.log(user.password);
       if (user) {
-      
         const matchPassword = await bcrypt.compare(password, user.password);
+        console.log(matchPassword);
         if (!matchPassword) {
           console.log("Password not match");
           res.status(400).json({ message: "Password not match", Status: 400 });
@@ -67,19 +70,24 @@ const signin = asyncHandler(async (req, res) => {
             process.env.JWT_SECRET_KEY,
             { expiresIn: "24h" }
           );
+          // user.token = token;
+          // const response = new ApiResponse(
+          //   200,
+          //   "User signin successfully",
+          //   user
+          // );
 
-          const response = new ApiResponse(
-            200,
-            "User signin successfully",
-            user,
-            token
-          );
+          // console.log(response);
           const options = {
             httpOnly: true,
-            
           };
           res.cookie("token", token, options);
-          return res.json(response);
+          return res.json({
+            message: "Signin successfull",
+            data: user,
+            status: 200,
+            token: token,
+          });
         }
       } else {
         console.log("User not exist");
@@ -243,8 +251,7 @@ const assignTrainer = asyncHandler(async (req, res) => {
   }
 });
 
-const currentUser = asyncHandler(async (req, res) =>
-{
+const currentUser = asyncHandler(async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     if (user) {
@@ -256,8 +263,7 @@ const currentUser = asyncHandler(async (req, res) =>
     console.log("Error in getting current user", error);
     res.status(500).json({ message: error, status: 500 });
   }
-}
-);
+});
 
 export {
   signup,

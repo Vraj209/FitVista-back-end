@@ -3,19 +3,44 @@ import mongoose from "mongoose";
 import { Cart } from "../models/cart.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
+// Add to cart
 const addItemToCart = asyncHandler(async (req, res) => {
   try {
-    // Verify and decode the token
-    const userId = req.user.id; // Extract userId from decoded token
-    const { id, name, price, quantity, category, image } = req.body;
-    console.log("userId", userId);
-    // Find the user's cart
+    // Output to check incoming structure
+    console.log("Received body:", req.body);
+
+    const userId = req.user.id; // Assuming authentication has correctly populated req.user
+    const { id, name, price, description, shortDescription, category, image } =
+      req.body.product_Data;
+
+    console.log("Product details:", {
+      id,
+      name,
+      price,
+      description,
+      shortDescription,
+      category,
+      image,
+    });
+
+    // Find the user's existing cart or create a new one
     let userCart = await Cart.findOne({ userId });
     if (!userCart) {
-      // If the user doesn't have a cart, create a new one
+      // Create a new cart if not found
       userCart = new Cart({
         userId,
-        items: [{ id, name, price, quantity, category, image }],
+        items: [
+          {
+            id,
+            name,
+            price,
+            description,
+            quantity: 1,
+            shortDescription,
+            category,
+            image,
+          },
+        ],
       });
     } else {
       // Check if the item already exists in the user's cart
@@ -23,20 +48,28 @@ const addItemToCart = asyncHandler(async (req, res) => {
         (item) => item.id === id
       );
       if (existingItemIndex !== -1) {
-        // If the item already exists, update its quantity
-        userCart.items[existingItemIndex].quantity += quantity;
+        // If the item exists, update its quantity
+        userCart.items[existingItemIndex].quantity += 1;
       } else {
-        // If the item is not in the cart, add it to the cart
-        userCart.items.push({ id, name, price, quantity, category, image });
+        // Otherwise, add the new item to the cart
+        userCart.items.push({
+          id,
+          name,
+          price,
+          description,
+          quantity: 1,
+          shortDescription,
+          category,
+          image,
+        });
       }
     }
 
+    // Save the updated cart
     await userCart.save();
-
     res.status(200).json({
       message: "Item added to cart successfully",
       cart: userCart,
-      status: 200,
     });
   } catch (error) {
     console.error("Error adding item to cart", error);
@@ -44,6 +77,7 @@ const addItemToCart = asyncHandler(async (req, res) => {
   }
 });
 
+// Get cart user by id
 const getCartByUserId = asyncHandler(async (req, res) => {
   try {
     // Extract userId from decoded token (assuming user is authenticated)
@@ -71,6 +105,7 @@ const getCartByUserId = asyncHandler(async (req, res) => {
   }
 });
 
+// Remove Product
 const removeProductFromCart = asyncHandler(async (req, res) => {
   try {
     // Extract userId from decoded token (assuming user is authenticated)
@@ -115,6 +150,8 @@ const removeProductFromCart = asyncHandler(async (req, res) => {
     res.status(500).json({ message: "Internal server error", status: 500 });
   }
 });
+
+// Empty Cart
 const emptyCart = asyncHandler(async (req, res) => {
   try {
     // Extract userId from decoded token (assuming user is authenticated)
@@ -140,4 +177,39 @@ const emptyCart = asyncHandler(async (req, res) => {
   }
 });
 
-export { addItemToCart, getCartByUserId, removeProductFromCart, emptyCart };
+// Update Quntity
+const updateItemQuantity = asyncHandler(async (req, res) => {
+  const { itemId } = req.params;
+  const { quantity } = req.body;
+  console.log("itemId", itemId);
+  console.log("Quantity Received:", quantity);
+
+  const userId = req.user.id; // Ensure that you are getting user ID from either session or token
+
+  try {
+    const cart = await Cart.findOne({ userId });
+    if (!cart) {
+      return res.status(404).send({ message: "Cart not found" });
+    }
+
+    const item = cart.items.find((item) => item.id === itemId);
+    if (!item) {
+      return res.status(404).send({ message: "Item not found in cart" });
+    }
+
+    item.quantity = quantity; // Update the quantity
+    await cart.save();
+    res.send({ message: "Quantity updated", cart });
+  } catch (error) {
+    console.error("Failed to update cart item quantity:", error);
+    res.status(500).send({ message: "Internal server error" });
+  }
+});
+
+export {
+  addItemToCart,
+  getCartByUserId,
+  removeProductFromCart,
+  emptyCart,
+  updateItemQuantity,
+};

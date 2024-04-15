@@ -68,19 +68,18 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) {
-    next();
-  }
+// userSchema.pre("save", async function (next) {
+//   if (!this.isModified("password")) {
+//     next();
+//   }
 
-  this.password = await bcrypt.hash(this.password, 10);
-});
+//   this.password = await bcrypt.hash(this.password, 10);
+// });
 
 userSchema.methods.getJWTToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET_KEY, {
-      expiresIn: process.env.JWT_EXPIRE
+    expiresIn: process.env.JWT_EXPIRE,
   });
-}
-
+};
 
 export const User = mongoose.model("User", userSchema);

@@ -7,7 +7,8 @@ import {
   deleteBlog,
 } from "../controllers/blog.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
-
+import { isAuthenticated } from "../middlewares/auth.middleware.js";
+import { authorizeRoles } from "../middlewares/auth.middleware.js";
 const router = Router();
 
 router.route("/addBlog").post(
@@ -19,9 +20,9 @@ router.route("/addBlog").post(
   ]),
   addBlog
 );
-router.route("/getBlogs").get(getBlogs);
-router.route("/getBlog/:id").get(getBlog);
-router.route("/updateBlog/:id").put(updateBlog);
-router.route("/deleteBlog/:id").delete(deleteBlog);
+router.route("/getBlogs").get(isAuthenticated,getBlogs);
+router.route("/getBlog/:id").get(isAuthenticated,getBlog);
+router.route("/updateBlog/:id").put(isAuthenticated,authorizeRoles("admin","trainer"),updateBlog);
+router.route("/deleteBlog/:id").delete(isAuthenticated,authorizeRoles("admin","trainer"),deleteBlog);
 
 export default router;

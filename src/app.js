@@ -13,20 +13,23 @@ import adminRouter from "./routes/admin.routes.js";
 import cartRouter from "./routes/cart.routes.js";
 
 dotenv.config();
-
+const URL = process.env.CORS_ORIGIN;
 const app = express();
+app.use(cookieParser());
+
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: URL,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
   })
 );
 
 app.use(bodyParser.json());
+
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public/temp"));
-app.use(cookieParser());
 
 paypal.configure({
   mode: "sandbox", //sandbox or live
@@ -54,9 +57,9 @@ app.use("/api/v1/product", productRouter);
 // Payment routes
 app.use("/api/v1/payment", paymentRouter);
 // Blog routes
-app.use("/api/v1/blog", blogRouter)
+app.use("/api/v1/blog", blogRouter);
 // Admin routes
-app.use("/api/v1/admin", adminRouter)
+app.use("/api/v1/admin", adminRouter);
 // Cart routes
 app.use("/api/v1/cart", cartRouter);
 export { app };
