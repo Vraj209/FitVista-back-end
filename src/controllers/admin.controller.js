@@ -8,7 +8,7 @@ const AssignTrainer = asyncHandler(async (req, res) => {
     const user = await User.findById(userId);
     if (user) {
       user.trainer = trainer;
-
+      
       const updatedTrainer = await user.save();
       console.log("Trainer Assigned  successfully");
       res.status(200).json({
