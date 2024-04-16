@@ -40,7 +40,7 @@ const uploadTraining = async (req, res) => {
         },
       });
       console.log("userId", userId);
-      const user = await User.find({ role: "user", trainer: userId });
+      const user = await User.find({ role: "trainee", trainer: userId });
       console.log(user);
       for (var i = 0; i < user.length; i++) {
         const mailOptions = {

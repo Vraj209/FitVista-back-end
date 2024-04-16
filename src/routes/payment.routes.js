@@ -1,9 +1,11 @@
 import { Router } from "express";
-import { payment, success } from "../controllers/payment.controller.js";
+import {   paymentAdd } from "../controllers/payment.controller.js";
+import { isAuthenticated } from "../middlewares/auth.middleware.js";
 const router = Router();
 
-router.route("/pay").post(payment)
-router.route("/sucess").get(success)
+router.route("/checkout").post(isAuthenticated,paymentAdd)
+
+
 
 
 export default router;
