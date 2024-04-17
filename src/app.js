@@ -12,43 +12,38 @@ import blogRouter from "./routes/blog.routes.js";
 import adminRouter from "./routes/admin.routes.js";
 import cartRouter from "./routes/cart.routes.js";
 import orderRouter from "./routes/order.routes.js";
-import trainingRouter from "./routes/training.routes.js"
-import trainingSessionRouter from './routes/session.routes.js'
+import trainingRouter from "./routes/training.routes.js";
+import trainingSessionRouter from "./routes/session.routes.js";
 
 dotenv.config();
-const URL = process.env.CORS_ORIGIN;
-const DEPLOYE_LINK =process.env.DEPLOY_URL
+
 const app = express();
 app.use(cookieParser());
+
+
 const allowedOrigins = [
-  process.env.CORS_ORIGIN,  // e.g., 'https://example.com'
-  process.env.DEPLOY_URL,   // e.g., 'https://staging.example.com'
+  process.env.CORS_ORIGIN,
+  process.env.DEPLOY_URL,
   process.env.BUILD_URL,
 ];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow browsers to send requests without an 'Origin' header (non-web clients)
-    if (!origin) return callback(null, true);
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow browsers to send requests without an 'Origin' header (non-web clients)
+      if (!origin) return callback(null, true);
 
-    // Check if the origin is in the allowed origins list
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-  credentials: true
-}));
-
-// app.use(
-//   cors({
-//     origin: URL,
-//     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-//     credentials: true,
-//   })
-// );
+      // Check if the origin is in the allowed origins list
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    credentials: true,
+  })
+);
 
 app.use(bodyParser.json());
 
@@ -95,7 +90,6 @@ app.use("/api/v1/cart", cartRouter);
 
 // Order routes
 app.use("/api/v1/order", orderRouter);
-
 
 // Training Routes Upload Routes
 app.use("/api/v1/training", trainingRouter);
