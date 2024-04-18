@@ -20,13 +20,11 @@ dotenv.config();
 const app = express();
 app.use(cookieParser());
 
-
 const allowedOrigins = [
   process.env.CORS_ORIGIN,
   process.env.DEPLOY_URL,
   process.env.BUILD_URL,
 ];
-
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -45,6 +43,13 @@ app.use(
   })
 );
 
+// app.use(
+//   cors({
+//     origin: process.env.CORS_ORIGIN,
+//     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+//     credentials: true,
+//   })
+// );
 app.use(bodyParser.json());
 
 app.use(express.json({ limit: "16kb" }));

@@ -68,7 +68,7 @@ const signin = asyncHandler(async (req, res) => {
           const token = jwt.sign(
             { userId: user._id, role: user.role, email: user.email },
             process.env.JWT_SECRET_KEY,
-            { expiresIn: "24h" }
+            { expiresIn: "48h" }
           );
           // user.token = token;
           // const response = new ApiResponse(
@@ -80,6 +80,7 @@ const signin = asyncHandler(async (req, res) => {
           // console.log(response);
           const options = {
             httpOnly: true,
+            secure: true,
           };
           res.cookie("token", token, options);
           return res.json({
