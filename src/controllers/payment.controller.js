@@ -1,78 +1,44 @@
-import paypal from "paypal-rest-sdk";
+import Stripe from "stripe";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { Checkout } from "../models/checkout.model.js";
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY); // Make sure to configure your secret key in environment variables
 
-const payment = async (req, res) => {
+// Express route to handle checkout creation
+const paymentAdd = asyncHandler(async (req, res) => {
+  const {
+    userid,
+    email,
+    total,
+    items,
+    Firstname,
+    Lastname,
+    address,
+    postalCode,
+    city,
+    province,
+    country,
+  } = req.body;
+
   try {
-    paypal.configure({
-      mode: "sandbox", //sandbox or live
-      client_id:
-        "AbVFhUp15XX72t3NY-WGW9OJUv5cN0hJfIhLDJkDRj-psh8vsmtWR2wQ2TW6cNL5HE6bHfuVTzGGMv14",
-      client_secret:
-        "EC0xQihBCor9xICx-YJJh0fUpClXRIbtHb9bHRS69Clwl22O-eZKi9K-ickI5nSZ-Z3jEGBdrTg4PzKq",
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: total * 100, // Convert dollars to cents
+      currency: "cad",
+      receipt_email: email,
+      metadata: { userid }, // Optional: include any additional metadata you find useful
     });
 
-    const create_payment_json = {
-      intent: "sale",
-      payer: {
-        payment_method: "paypal",
-      },
-      redirect_urls: {
-        return_url: "http://localhost:3000/success",
-        cancel_url: "http://localhost:3000/cancel",
-      },
-      transactions: [
-        {
-          item_list: {
-            items: [
-              {
-                name: "Training",
-                sku: "001",
-                price: "25.00",
-                currency: "USD",
-                quantity: 1,
-              },
-            ],
-          },
-          amount: {
-            currency: "USD",
-            total: "25.00",
-          },
-          description: "Payment Training",
-        },
-      ],
-    };
-    if (create_payment_json) {
-      paypal.payment.create(create_payment_json, function (error, payment) {
-        if (error) {
-          throw error;
-        } else {
-          for (let i = 0; i < payment.links.length; i++) {
-            if (payment.links[i].rel === "approval_url") {
-              res.redirect(payment.links[i].href);
-            }
-          }
-        }
-      });
-    }
+    // Here you can save the checkout details along with paymentIntent.id to your database
+    const newCheckout = new Checkout({
+      ...req.body,
+      paymentIntentId: paymentIntent.id,
+      paymentStatus: "pending",
+    });
+
+    await newCheckout.save();
+
+    res.send({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: error, Status: 500 });
+    res.status(500).send({ error: error.message });
   }
-};
-
-const success = async (req, res) => {
-  const payerId = req.query.PayerID;
-  const paymentId = req.query.paymentId;
-
-  const execute_payment_json = {
-    payer_id: payerId,
-    transactions: [
-      {
-        amount: {
-          currency: "USD",
-          total: "25.00",
-        },
-      },
-    ],
-  };
-};
-export { payment, success };
+});
+export { paymentAdd };
