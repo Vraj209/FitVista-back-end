@@ -81,6 +81,7 @@ const signin = asyncHandler(async (req, res) => {
           const options = {
             httpOnly: true,
             secure: true,
+            sameSite: "none",
           };
           res.cookie("token", token, options);
           return res.json({
